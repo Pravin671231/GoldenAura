@@ -59,7 +59,7 @@ export function Footer() {
           </address>
         </div>
       </div>
-      <div className="border-t border-black/10 px-4 py-4 text-center text-xs text-black/50 sm:px-6 lg:px-8">
+      <div className="border-t border-black/10 px-4 py-4 text-center text-xs text-black/70 sm:px-6 lg:px-8">
         &copy; {new Date().getFullYear()} Golden Aura. All rights reserved.
       </div>
     </footer>
