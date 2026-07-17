@@ -22,11 +22,9 @@ type BaseProps = {
   className?: string;
 };
 
-type ButtonAsButton = BaseProps &
-  ButtonHTMLAttributes<HTMLButtonElement> & { href?: undefined };
+type ButtonAsButton = BaseProps & ButtonHTMLAttributes<HTMLButtonElement> & { href?: undefined };
 
-type ButtonAsAnchor = BaseProps &
-  AnchorHTMLAttributes<HTMLAnchorElement> & { href: string };
+type ButtonAsAnchor = BaseProps & AnchorHTMLAttributes<HTMLAnchorElement> & { href: string };
 
 export type ButtonProps = ButtonAsButton | ButtonAsAnchor;
 
@@ -46,18 +44,8 @@ export function Button({
   );
 
   if (props.href !== undefined) {
-    return (
-      <a
-        className={classes}
-        {...(props as AnchorHTMLAttributes<HTMLAnchorElement>)}
-      />
-    );
+    return <a className={classes} {...(props as AnchorHTMLAttributes<HTMLAnchorElement>)} />;
   }
 
-  return (
-    <button
-      className={classes}
-      {...(props as ButtonHTMLAttributes<HTMLButtonElement>)}
-    />
-  );
+  return <button className={classes} {...(props as ButtonHTMLAttributes<HTMLButtonElement>)} />;
 }
