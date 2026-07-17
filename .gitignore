@@ -1,3 +1,12 @@
 .DS_Store
 Thumbs.db
 *.log
+
+node_modules/
+/app/.next/
+/app/out/
+/e2e/test-results/
+/e2e/playwright-report/
+/e2e/blob-report/
+.env*.local
+coverage/

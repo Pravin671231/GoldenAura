@@ -1,0 +1,12 @@
+{
+  "name": "golden-aura",
+  "private": true,
+  "workspaces": [
+    "app",
+    "e2e"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {}
+}
