@@ -28,26 +28,47 @@ Milestones run in the order below — each is a prerequisite for the next (test 
 5. `next build` (static export) succeeds with no warnings.
 6. Branch rebased onto latest `main`; CI green; PR reviewed (self-review acceptable for solo dev, but diff must be read end-to-end).
 
+**Workspace layout** (npm workspaces, established in M1):
+```
+/ (root package.json — "workspaces": ["app", "e2e"], Node version pinned via .nvmrc/engines)
+  app/     — Next.js package: App Router lives at app/app/ (Next.js convention nested inside
+             the workspace package of the same name), plus components/{ui,layout}/, lib/,
+             data/, content/ (care-guide), public/ — own package.json, tsconfig.json, Vitest config
+  e2e/     — Playwright + @axe-core/playwright package, own package.json/tsconfig.json —
+             runs against app's built out/
+  docker/  — Dockerfile, docker-compose.yml (M3) — build context is the repo root so the image
+             can see the workspace lockfile + app/, invoked as `docker build -f docker/Dockerfile .`
+             — not a workspace member, no package.json
+  docs/    — plain markdown folder (SRS, MILESTONES, component-map.md, testcases.md, user manual)
+             — not a workspace member, no install/build step
+```
+Root scripts delegate per package, e.g. `npm run test -w app`, `npm run test:e2e -w e2e`, `npm run build -w app`.
+
+`.dockerignore` is the one exception kept at the **repo root** rather than in `docker/`: Docker resolves it relative to the build context (root, per above), not the Dockerfile's own directory, so it has to live there to take effect.
+
 ---
 
 ## Milestone 1 — Base Project Setup + Test Suite
 
-**Goal:** A working, empty-but-real Next.js static-export skeleton with the full test/lint toolchain wired in and passing, before any real feature work starts.
+**Goal:** A working npm-workspaces skeleton (`app` + `e2e` packages) with the full test/lint toolchain wired in and passing, and every mock-ui page mapped to a concrete component structure, before any real feature work starts.
 
 | # | Task |
 |---|---|
-| 1.1 | Scaffold Next.js 16.2.10 (App Router) + TypeScript + Tailwind CSS 4.3.2 |
-| 1.2 | Configure `next.config` with `output: 'export'`; verify `next build` produces `out/` |
-| 1.3 | Set up folder structure: `app/`, `components/`, `lib/`, `data/`, `content/` (care-guide), `docs/`, `public/` |
-| 1.4 | ESLint + Prettier config, `npm run lint` / `npm run format` scripts |
-| 1.5 | Install & configure Vitest + React Testing Library; one passing sample unit test |
-| 1.6 | Install & configure Playwright; one passing smoke test against `next build` static output served locally (e.g. via `serve out/`) |
-| 1.7 | Install `@axe-core/playwright`; one passing a11y scan test on the placeholder home page |
-| 1.8 | Base layout shell: `<html>`/`<body>`, header/nav placeholder, footer placeholder, global Tailwind styles |
-| 1.9 | `package.json` scripts: `dev`, `build`, `lint`, `typecheck`, `test`, `test:e2e`, `test:a11y` |
-| 1.10 | Git repo initialized, `.gitignore` (node_modules, out/, .next/, test-results/), initial commit |
+| 1.1 | Root `package.json` with `"workspaces": ["app", "e2e"]`; Node version pinned (`.nvmrc` + `engines` field) |
+| 1.2 | Scaffold `app/`: Next.js 16.2.10 (App Router) + TypeScript + Tailwind CSS 4.3.2 |
+| 1.3 | Configure `app/next.config` with `output: 'export'`; verify `next build` produces `app/out/` |
+| 1.4 | Scaffold `e2e/`: Playwright + `@axe-core/playwright`, own `package.json`/`tsconfig.json`, pointed at `app`'s static `out/` |
+| 1.5 | Page-wise component mapping: walk every `mock-ui/*.html` page against `SRS.md` §4 and record every shared/unique UI piece in `docs/component-map.md` |
+| 1.6 | Define `app/components/ui/` (atoms: Button, Card, Container, Chip, …) vs `app/components/layout/` (Header, Footer, PageShell, Nav, FABs) structure, driven by the component map |
+| 1.7 | ESLint + Prettier config in `app/`; `npm run lint` / `npm run format` scripts |
+| 1.8 | Install & configure Vitest + React Testing Library in `app/`; one passing sample unit test |
+| 1.9 | Install & configure Playwright in `e2e/`; one passing smoke test against `app`'s static output served locally (e.g. via `serve app/out`) |
+| 1.10 | One passing `@axe-core/playwright` a11y scan test on the placeholder home page |
+| 1.11 | Base layout shell in `app/`: `<html>`/`<body>`, header/nav placeholder, footer placeholder, global Tailwind styles — matching mock-ui's shared header/footer |
+| 1.12 | Root + per-package `package.json` scripts: `dev`, `build`, `lint`, `typecheck`, `test`, `test:e2e`, `test:a11y` (delegating via `-w app` / `-w e2e`) |
+| 1.13 | Git repo initialized, `.gitignore` (`node_modules`, `out/`, `.next/`, `test-results/`), initial commit |
 
-**Exit criteria:** `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build`, `npm run test:e2e` all pass locally on a from-scratch clone.
+**Exit criteria:** `npm run lint`, `npm run typecheck`, `npm run test -w app`, `npm run build -w app`, `npm run test:e2e -w e2e` all pass locally on a from-scratch clone.
 
 ---
 
@@ -78,10 +99,10 @@ Milestones run in the order below — each is a prerequisite for the next (test 
 
 | # | Task |
 |---|---|
-| 3.1 | Multi-stage `Dockerfile`: stage 1 (Node 20) installs deps + runs `next build` (static export); stage 2 (nginx:alpine) copies `out/` and serves it |
-| 3.2 | `docker-compose.yml` for local preview of the production-like container |
-| 3.3 | `.dockerignore` (node_modules, .next, out, test-results, docs) |
-| 3.4 | `.github/workflows/cd.yml`: on merge to `main` (after CI passes) — build Docker image, tag with commit SHA + `latest` |
+| 3.1 | Multi-stage `docker/Dockerfile`: stage 1 (Node 20) installs deps + runs `next build` (static export) from `app/`; stage 2 (nginx:alpine) copies `app/out/` and serves it |
+| 3.2 | `docker/docker-compose.yml` for local preview of the production-like container (`context: ..`, `dockerfile: docker/Dockerfile`) |
+| 3.3 | `.dockerignore` at repo root — build-context root, not `docker/` (see Workspace layout note in §0); covers `node_modules`, `.next`, `app/out`, `test-results`, `docs` |
+| 3.4 | `.github/workflows/cd.yml`: on merge to `main` (after CI passes) — build Docker image via `docker build -f docker/Dockerfile .`, tag with commit SHA + `latest` |
 | 3.5 | Push image to GitHub Container Registry (ghcr.io) |
 | 3.6 | Deploy step: pull + run the image on the target host (self-hosted VPS via SSH action, or trigger a redeploy webhook if using a container-hosting platform) |
 | 3.7 | Document rollback procedure: redeploy previous image tag |
@@ -115,7 +136,13 @@ Order chosen for dependency + business priority (shared shell first; lead-gen-cr
 | 4.12 | `feat/a11y-perf-audit` | Full-site accessibility + Lighthouse pass, fix findings — NFR-3.x, NFR-1.x | Final hardening pass |
 | 4.13 | `feat/cross-browser-qa` | Manual + automated check across target browsers/viewports — NFR-6.x | Pre-launch QA |
 
-Each branch: implement → tests (unit/E2E/a11y per DoD) → rebase onto `main` → PR → CI green → merge → CD deploys automatically (from M3).
+**Per-branch workflow** (applies to every row above — incremental TDD per page, not a whole-site batch):
+1. Pull the page's components from `docs/component-map.md` (M1.5); reuse existing `ui/`/`layout/` pieces or add new ones there.
+2. Write unit tests for the page's new components/logic (red).
+3. Implement until unit tests pass (green).
+4. Write the page's E2E scenario(s); append them to `docs/testcases.md` — built up incrementally, one page at a time, not as a single end-of-project pass.
+5. Implement/fix until the E2E scenarios pass; run the a11y scan.
+6. Rebase onto `main` → PR → CI green → merge → CD deploys automatically (from M3).
 
 **Exit criteria:** All routes in the SRS §3 site map are live, CI green on `main`, deployed container/site reflects the full feature set.
 
@@ -130,6 +157,8 @@ Each branch: implement → tests (unit/E2E/a11y per DoD) → rebase onto `main` 
 | 5.3 | Google Search Console + sitemap submission |
 | 5.4 | Analytics verified firing correctly in production |
 | 5.5 | Domain + HTTPS confirmed on the deployment target |
+| 5.6 | User manual (`docs/user-manual.md`): site navigation and content-update workflow (plants/services/pricing) for shop staff, written against the finished production site |
+| 5.7 | Monorepo documentation pass: root `README.md` covers the `app`/`e2e`/`docs` workspace layout, per-package scripts, and Node version requirement (`.nvmrc`/`engines`) |
 
 ---
 
