@@ -10,3 +10,5 @@ node_modules/
 /e2e/blob-report/
 .env*.local
 coverage/
+/lhci-reports/
+/.lighthouseci/

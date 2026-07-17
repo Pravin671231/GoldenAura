@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
     "test:a11y": "playwright test tests/a11y.spec.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
-    "@playwright/test": "^1.60.0",
+    "@playwright/test": "1.60.0",
     "@types/node": "^20.19.43",
     "serve": "^14.2.6",
     "typescript": "^5.9.3"
