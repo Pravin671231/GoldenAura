@@ -2,6 +2,7 @@
   "ci": {
     "collect": {
       "staticDistDir": "./app/out",
+      "url": ["/index.html"],
       "numberOfRuns": 3
     },
     "assert": {
