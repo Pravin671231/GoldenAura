@@ -1,0 +1,13 @@
+{
+  "name": "e2e",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {},
+  "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^20.19.43",
+    "serve": "^14.2.6",
+    "typescript": "^5.9.3"
+  }
+}
