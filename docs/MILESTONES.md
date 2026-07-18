@@ -41,7 +41,7 @@ Milestones run in the order below — each is a prerequisite for the next (test 
 ```
 Root scripts delegate per package, e.g. `npm run test -w app`, `npm run test:e2e -w e2e`, `npm run build -w app`.
 
-Deployment (M3) targets Vercel directly from the static export — no `docker/` folder or `.dockerignore` (see M3 for the 2026-07-18 decision dropping Docker/self-hosted-VPS in favor of a static host).
+Deployment (M3) targets Cloudflare Pages directly from the static export — no `docker/` folder or `.dockerignore` (see M3 for the 2026-07-18 decision dropping Docker/self-hosted-VPS in favor of a static host).
 
 ---
 
@@ -92,18 +92,18 @@ Deployment (M3) targets Vercel directly from the static export — no `docker/` 
 
 ## Milestone 3 — Deployment / CD Pipeline
 
-**Goal:** GitHub Actions handles continuous deployment of the static export to Vercel on merge to `main`, gated behind CI (M2) passing, with an automated post-deploy health check and a documented, exercised rollback path.
+**Goal:** GitHub Actions handles continuous deployment of the static export to Cloudflare Pages on merge to `main`, gated behind CI (M2) passing, with an automated post-deploy health check and a documented, exercised rollback path.
 
-**Decision (2026-07-18):** Docker/self-hosted-VPS deployment (the milestone's original scope) was dropped in favor of deploying the static `app/out/` directly to Vercel. Rationale: `output: 'export'` produces a plain static site with no server-side runtime requirement, so a container + reverse proxy adds operational overhead (image builds, registry, host management, SSH deploy) without buying anything a static host doesn't already provide — Vercel's own build/deploy/rollback tooling covers the milestone's actual goals (reproducible deploy on merge, health check, rollback) more simply. `docker/` is removed from the workspace layout in §0.
+**Decision (2026-07-18):** Docker/self-hosted-VPS deployment (the milestone's original scope) was dropped in favor of deploying the static `app/out/` directly to a static host. Rationale: `output: 'export'` produces a plain static site with no server-side runtime requirement, so a container + reverse proxy adds operational overhead (image builds, registry, host management, SSH deploy) without buying anything a static host doesn't already provide. Cloudflare Pages was chosen over Vercel (the initial pick) since we deploy our own already-built `app/out/` directly (Direct Upload) rather than delegating the build to the host, and Cloudflare's Pages API exposes rollback as a documented, scriptable HTTP call. `docker/` is removed from the workspace layout in §0.
 
 | # | Task |
 |---|---|
 | 3.1 | `.github/workflows/cd.yml`: triggered on push to `main` (branch protection from M2 already guarantees CI passed before code lands there) |
-| 3.2 | Vercel CLI deploy (`vercel pull` / `vercel build` / `vercel deploy --prebuilt --prod`), authenticated via `VERCEL_TOKEN`/`VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` repo secrets |
+| 3.2 | Build (`npm run build -w app`) then deploy via `cloudflare/wrangler-action` (`wrangler pages deploy app/out --project-name=golden-aura`), authenticated via `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID` repo secrets |
 | 3.3 | Post-deploy health check: `curl` the deployment URL, expect HTTP 200, fail the workflow otherwise |
-| 3.4 | Document rollback procedure (Vercel's instant-rollback to a previous deployment) and exercise it at least once |
+| 3.4 | Document rollback procedure (Cloudflare Pages dashboard or the Pages deployment rollback API) and exercise it at least once |
 
-**Exit criteria:** A merge to `main` results in an updated Vercel deployment automatically built, deployed, and health-checked, with zero manual steps; a documented rollback has been exercised successfully at least once.
+**Exit criteria:** A merge to `main` results in an updated Cloudflare Pages deployment automatically built, deployed, and health-checked, with zero manual steps; a documented rollback has been exercised successfully at least once.
 
 ---
 
