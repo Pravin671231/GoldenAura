@@ -104,3 +104,16 @@ each subsequent per-page M4 branch, per the per-branch workflow in `docs/MILESTO
   truth; `Header`/`Footer`/`FabGroup` and all page-level contact info now read from it instead of
   hardcoding values (this also fixed a pre-existing address drift between `Footer.tsx` and
   `mock-ui/contact.html`).
+
+## Update (M4.3 — `feat/home-page`)
+
+- `PlaceholderImage` (wraps `next/image` around a local placeholder SVG, `gold` variant), `CategoryCard`,
+  and `OfferStrip` added to `components/ui/` — cross-page atoms reused by Plants/Pots &
+  Accessories/Services once those branches ship.
+- Home-page-only composition lives in `components/page/home/` (`HeroFull`, `BestsellerCard`,
+  `BestsellersCarousel`, `ServicesTeaser`, `TestimonialCard`, `GalleryPreviewStrip`), matching the
+  `components/page/<route>/` convention started in M4.2.
+- `app/not-found.tsx` added (FR-10.2 custom 404) — bundled into this branch since no M4 issue
+  explicitly owned it and Home's category grid already needed 404-tolerant linking.
+- `data/{categories,plants,testimonials,gallery}.ts` authored in full (all 8 categories, though only
+  4 plants seeded so far — the rest arrive in M4.4/`feat/plants-catalog`).

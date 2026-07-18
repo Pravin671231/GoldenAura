@@ -6,7 +6,7 @@ type Size = "md" | "sm";
 
 const variantClasses: Record<Variant, string> = {
   primary: "bg-emerald-700 text-white hover:bg-emerald-800",
-  accent: "bg-amber-600 text-white hover:bg-amber-700",
+  accent: "bg-amber-700 text-white hover:bg-amber-800",
   outline: "border border-current bg-transparent hover:bg-black/5",
 };
 
