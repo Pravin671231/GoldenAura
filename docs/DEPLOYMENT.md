@@ -1,29 +1,30 @@
 # Deployment
 
-Golden Aura deploys as a static export (`app/out/`) to Vercel. Deployment is automated via `.github/workflows/cd.yml`, which runs on every push to `main` — since `main` is protected (see `docs/MILESTONES.md` §Milestone 2), that means every deploy has already passed the full CI suite.
+Golden Aura deploys as a static export (`app/out/`) to Cloudflare Pages. Deployment is automated via `.github/workflows/cd.yml`, which runs on every push to `main` — since `main` is protected (see `docs/MILESTONES.md` §Milestone 2), that means every deploy has already passed the full CI suite.
 
 ## One-time setup (required before the CD workflow can succeed)
 
-1. **Create a Vercel project** for this repo (via the Vercel dashboard, "Import Project" from GitHub), or run `vercel link` locally from the repo root.
-2. **Set the project's Root Directory to `app`** — this is an npm-workspaces monorepo; the Next.js app lives at `app/`, not the repo root. Vercel's monorepo support handles the root `package-lock.json`/workspaces automatically once this is set.
-3. **Disable Vercel's own Git integration auto-deploys** (Project Settings → Git → toggle off), if the project was created via "Import Project" — deploys should only happen through the `cd.yml` workflow (which runs *after* CI passes), not on every push independently.
-4. **Generate a Vercel API token**: Account Settings → Tokens → Create Token.
-5. **Add three repo secrets** (Settings → Secrets and variables → Actions, on GitHub — not pasted anywhere else):
-   - `VERCEL_TOKEN` — the token from step 4
-   - `VERCEL_ORG_ID` — from `.vercel/project.json` after running `vercel link` locally, or the Vercel dashboard's team/account settings
-   - `VERCEL_PROJECT_ID` — from the same `.vercel/project.json`, or the project's Settings page
+1. **Create a Cloudflare Pages project** named `golden-aura` (Cloudflare dashboard → Workers & Pages → Create → Pages → "Direct Upload" — do *not* connect Cloudflare's own Git integration, since deploys should only happen through the `cd.yml` workflow after CI passes, not independently on every push). If you'd rather use a different project name, update `--project-name=golden-aura` in `.github/workflows/cd.yml` to match.
+2. **Generate a Cloudflare API token**: My Profile → API Tokens → Create Token, with the "Cloudflare Pages — Edit" permission (scoped to the account that owns the project).
+3. **Find your Account ID**: Cloudflare dashboard → any domain/Workers & Pages overview page → right sidebar.
+4. **Add two repo secrets** (GitHub repo → Settings → Secrets and variables → Actions — not pasted anywhere else):
+   - `CLOUDFLARE_API_TOKEN` — the token from step 2
+   - `CLOUDFLARE_ACCOUNT_ID` — from step 3
 
-Once these three secrets exist, every push to `main` triggers `cd.yml`: `vercel pull` → `vercel build --prod` → `vercel deploy --prebuilt --prod`, followed by an automated health check (`curl` the deployed URL, expect HTTP 200 on `/`). The workflow fails if the health check fails.
+Once these two secrets exist, every push to `main` triggers `cd.yml`: build (`npm run build -w app` → `app/out/`) → `wrangler pages deploy app/out --project-name=golden-aura` (via `cloudflare/wrangler-action`) → an automated health check (`curl` the deployment URL, expect HTTP 200 on `/`). The workflow fails if the health check fails. Since the project uses Direct Upload (no build step on Cloudflare's side), the exact static output produced and verified in CI is what gets deployed — no re-build happens on Cloudflare's infrastructure.
 
 ## Rollback
 
-Vercel keeps every previous deployment addressable and promotable. To roll back to a previous production deployment:
+Cloudflare Pages keeps up to the 100 most recently published deployments, each independently addressable:
 
+**Dashboard (simplest):** Pages project → Deployments tab → select a previous deployment → "Rollback to this deployment". Production traffic switches within seconds; no rebuild required.
+
+**CLI + API:**
 ```
-vercel ls --token=$VERCEL_TOKEN                          # find the prior deployment's URL/ID
-vercel rollback <deployment-url-or-id> --token=$VERCEL_TOKEN
+wrangler pages deployment list --project-name=golden-aura   # find the prior deployment's ID
+
+curl -X POST \
+  "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/golden-aura/deployments/$DEPLOYMENT_ID/rollback" \
+  -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN"
 ```
-
-Equivalently, from the Vercel dashboard: Deployments tab → select a previous deployment → "Promote to Production".
-
-Rollback does not require a new build — it re-promotes an existing, already-built deployment, so it's fast and doesn't depend on the source repo state at all.
+(Wrangler has no dedicated `rollback` subcommand for Pages — that CLI command exists only for Workers — so the API call above is the CLI-driven equivalent of the dashboard button.)

@@ -151,22 +151,22 @@ Per `MILESTONES.md` §0 sequencing policy, the test suite (M1) must exist before
 **Depends on:** M2 · **Blocks:** M4 (all)
 
 ### Context
-GitHub Actions handles continuous deployment of the static export to Vercel on merge to `main`, once CI (M2) is green.
+GitHub Actions handles continuous deployment of the static export to Cloudflare Pages on merge to `main`, once CI (M2) is green.
 
-**Decision (2026-07-18):** Docker/self-hosted-VPS deployment (this milestone's original scope) was dropped in favor of deploying the static `app/out/` directly to Vercel. Rationale: `output: 'export'` produces a plain static site with no server-side runtime requirement, so a container + reverse proxy adds operational overhead (image builds, a registry, host management, SSH deploy) without buying anything a static host doesn't already provide — Vercel's own build/deploy/rollback tooling covers the milestone's actual goals (reproducible deploy on merge, health check, rollback) more simply. `docker/` is removed from the workspace layout in `MILESTONES.md` §0.
+**Decision (2026-07-18):** Docker/self-hosted-VPS deployment (this milestone's original scope) was dropped in favor of deploying the static `app/out/` directly to a static host. Rationale: `output: 'export'` produces a plain static site with no server-side runtime requirement, so a container + reverse proxy adds operational overhead (image builds, a registry, host management, SSH deploy) without buying anything a static host doesn't already provide. Cloudflare Pages was chosen over Vercel (the initial pick) since we deploy our own already-built `app/out/` directly (Direct Upload) rather than delegating the build to the host, and Cloudflare's Pages API exposes rollback as a documented, scriptable HTTP call. `docker/` is removed from the workspace layout in `MILESTONES.md` §0.
 
 ### Scope
-**In scope:** `cd.yml`, Vercel CLI deploy, post-deploy health check, rollback documentation.
+**In scope:** `cd.yml`, Cloudflare Pages deploy via Wrangler, post-deploy health check, rollback documentation.
 **Out of scope:** feature pages (M4).
 
 ### Implementation Tasks
 - [ ] 3.1 `.github/workflows/cd.yml`: triggered on push to `main` (branch protection from M2 already guarantees CI passed before code lands there)
-- [ ] 3.2 Vercel CLI deploy (`vercel pull` / `vercel build` / `vercel deploy --prebuilt --prod`), authenticated via `VERCEL_TOKEN`/`VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` repo secrets
+- [ ] 3.2 Build (`npm run build -w app`) then deploy via `cloudflare/wrangler-action` (`wrangler pages deploy app/out --project-name=golden-aura`), authenticated via `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID` repo secrets
 - [ ] 3.3 Post-deploy health check: `curl` the deployment URL, expect HTTP 200, fail the workflow otherwise
-- [ ] 3.4 Document rollback procedure (Vercel's instant-rollback to a previous deployment) and exercise it at least once
+- [ ] 3.4 Document rollback procedure (Cloudflare Pages dashboard or the Pages deployment rollback API) and exercise it at least once
 
 ### Acceptance Criteria
-- [ ] A merge to `main` results in an updated Vercel deployment automatically built and deployed with zero manual steps
+- [ ] A merge to `main` results in an updated Cloudflare Pages deployment automatically built and deployed with zero manual steps
 - [ ] The deployment serves `/` with HTTP 200 (automated post-deploy health check)
 - [ ] Rollback procedure is documented and has been exercised at least once
 
