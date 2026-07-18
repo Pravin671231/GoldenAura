@@ -51,11 +51,11 @@ test.describe("mobile nav collapse", () => {
     const toggle = page.getByRole("button", { name: "Open menu" });
 
     await expect(nav).toHaveAttribute("data-state", "closed");
-    await expect(page.getByRole("link", { name: "Plants" })).not.toBeVisible();
+    await expect(nav.getByRole("link", { name: "Plants", exact: true })).not.toBeVisible();
 
     await toggle.click();
     await expect(nav).toHaveAttribute("data-state", "open");
-    await expect(page.getByRole("link", { name: "Plants" })).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Plants", exact: true })).toBeVisible();
 
     await page.getByRole("button", { name: "Close menu" }).click();
     await expect(nav).toHaveAttribute("data-state", "closed");
@@ -78,7 +78,8 @@ test.describe("desktop nav", () => {
 
   test("primary nav is visible without opening the hamburger", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("link", { name: "Plants" })).toBeVisible();
+    const nav = page.getByRole("navigation", { name: "Primary" });
+    await expect(nav.getByRole("link", { name: "Plants", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Open menu" })).not.toBeVisible();
   });
 });
