@@ -36,15 +36,12 @@ Milestones run in the order below — each is a prerequisite for the next (test 
              data/, content/ (care-guide), public/ — own package.json, tsconfig.json, Vitest config
   e2e/     — Playwright + @axe-core/playwright package, own package.json/tsconfig.json —
              runs against app's built out/
-  docker/  — Dockerfile, docker-compose.yml (M3) — build context is the repo root so the image
-             can see the workspace lockfile + app/, invoked as `docker build -f docker/Dockerfile .`
-             — not a workspace member, no package.json
   docs/    — plain markdown folder (SRS, MILESTONES, component-map.md, testcases.md, user manual)
              — not a workspace member, no install/build step
 ```
 Root scripts delegate per package, e.g. `npm run test -w app`, `npm run test:e2e -w e2e`, `npm run build -w app`.
 
-`.dockerignore` is the one exception kept at the **repo root** rather than in `docker/`: Docker resolves it relative to the build context (root, per above), not the Dockerfile's own directory, so it has to live there to take effect.
+Deployment (M3) targets Vercel directly from the static export — no `docker/` folder or `.dockerignore` (see M3 for the 2026-07-18 decision dropping Docker/self-hosted-VPS in favor of a static host).
 
 ---
 
@@ -93,24 +90,20 @@ Root scripts delegate per package, e.g. `npm run test -w app`, `npm run test:e2e
 
 ---
 
-## Milestone 3 — Docker & Deployment / CD Pipeline
+## Milestone 3 — Deployment / CD Pipeline
 
-**Goal:** Reproducible, containerized build-and-serve path, with GitHub Actions handling continuous deployment on merge to `main`.
+**Goal:** GitHub Actions handles continuous deployment of the static export to Vercel on merge to `main`, gated behind CI (M2) passing, with an automated post-deploy health check and a documented, exercised rollback path.
+
+**Decision (2026-07-18):** Docker/self-hosted-VPS deployment (the milestone's original scope) was dropped in favor of deploying the static `app/out/` directly to Vercel. Rationale: `output: 'export'` produces a plain static site with no server-side runtime requirement, so a container + reverse proxy adds operational overhead (image builds, registry, host management, SSH deploy) without buying anything a static host doesn't already provide — Vercel's own build/deploy/rollback tooling covers the milestone's actual goals (reproducible deploy on merge, health check, rollback) more simply. `docker/` is removed from the workspace layout in §0.
 
 | # | Task |
 |---|---|
-| 3.1 | Multi-stage `docker/Dockerfile`: stage 1 (Node 20) installs deps + runs `next build` (static export) from `app/`; stage 2 (nginx:alpine) copies `app/out/` and serves it |
-| 3.2 | `docker/docker-compose.yml` for local preview of the production-like container (`context: ..`, `dockerfile: docker/Dockerfile`) |
-| 3.3 | `.dockerignore` at repo root — build-context root, not `docker/` (see Workspace layout note in §0); covers `node_modules`, `.next`, `app/out`, `test-results`, `docs` |
-| 3.4 | `.github/workflows/cd.yml`: on merge to `main` (after CI passes) — build Docker image via `docker build -f docker/Dockerfile .`, tag with commit SHA + `latest` |
-| 3.5 | Push image to GitHub Container Registry (ghcr.io) |
-| 3.6 | Deploy step: pull + run the image on the target host (self-hosted VPS via SSH action, or trigger a redeploy webhook if using a container-hosting platform) |
-| 3.7 | Document rollback procedure: redeploy previous image tag |
-| 3.8 | Health check: container serves `/` with HTTP 200 post-deploy, workflow fails the deploy if not |
+| 3.1 | `.github/workflows/cd.yml`: triggered on push to `main` (branch protection from M2 already guarantees CI passed before code lands there) |
+| 3.2 | Vercel CLI deploy (`vercel pull` / `vercel build` / `vercel deploy --prebuilt --prod`), authenticated via `VERCEL_TOKEN`/`VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` repo secrets |
+| 3.3 | Post-deploy health check: `curl` the deployment URL, expect HTTP 200, fail the workflow otherwise |
+| 3.4 | Document rollback procedure (Vercel's instant-rollback to a previous deployment) and exercise it at least once |
 
-**Note:** because this is a static export, Docker/Nginx is one valid hosting path (useful for self-hosted VPS control) — plain static hosts (Netlify/Cloudflare Pages/Vercel static) remain a simpler alternative if self-hosting isn't required. Confirm hosting target before building this milestone out fully.
-
-**Exit criteria:** A merge to `main` results in an updated container image automatically deployed and reachable, with zero manual steps.
+**Exit criteria:** A merge to `main` results in an updated Vercel deployment automatically built, deployed, and health-checked, with zero manual steps; a documented rollback has been exercised successfully at least once.
 
 ---
 
