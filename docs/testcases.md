@@ -113,3 +113,57 @@ FR refs: FR-8.1–FR-8.4 · NFR refs: NFR-4.1, NFR-4.2
 - When: an axe-core scan runs against the page
 - Then: no violation with impact `critical` or `serious` is reported
 - Note: an earlier draft nested `dt`/`dd` inside a wrapping `<div>` under `<dl>` in `InfoList`, which axe correctly flagged (`dlitem`, serious) as not being a direct child of the list — fixed by switching to a plain `<ul>`/`<li>` structure instead of forcing definition-list semantics onto a layout that needed an icon column.
+
+## Feature: Home page (M4.3 — `feat/home-page`, issue #7)
+
+FR refs: FR-1.1–FR-1.5, FR-1.7 · NFR refs: NFR-3.1 (alt text)
+
+### Unit/component tests
+
+| ID | Component | Description |
+|----|-----------|-------------|
+| U18 | `PlaceholderImage` | Renders an image with the given alt text; applies a gold tint overlay when requested |
+| U19 | `CategoryCard` | Links to `/plants/[category-slug]`; renders the category name and description |
+| U20 | `OfferStrip` | Renders heading, body, and CTA link |
+| U21 | `HeroFull` | Renders heading/lead/both CTAs; renders the three stat highlights |
+| U22 | `BestsellerCard` | Renders plant name, care chips, price range; View links to the plant's category route |
+| U23 | `BestsellersCarousel` | Renders a card for every plant passed in, plus Prev/Next controls |
+| U24 | `ServicesTeaser` | Renders all three teaser cards, each linking to `/services` |
+| U25 | `TestimonialCard` | Renders as a `<blockquote>` with quote, author name, and role |
+| U26 | `GalleryPreviewStrip` | Renders an image for every photo passed in |
+| U27 | `NotFound` (`app/not-found.tsx`) | Renders the wilted-away heading with links back to Home and Plants |
+
+### E2E scenarios (Given/When/Then)
+
+**E12 — Home renders all major sections**
+- Given: `/` is built and served
+- When: the page loads
+- Then: hero, offer strip, category grid, bestsellers, services teaser, testimonials, gallery preview, and CTA band headings are all visible
+
+**E13 — Category grid links resolve to real category routes**
+- Given: `/` is built and served
+- When: the page loads
+- Then: each of the 4 featured category cards links to its real `/plants/[category]` route (may 404 until #8 ships — accepted per issue scope)
+
+**E14 — Gallery preview strip links to `/gallery`**
+- Given: `/` is built and served
+- When: the page loads
+- Then: "View Full Gallery" links to `/gallery`
+
+**E15 — Bestsellers carousel Prev/Next controls are keyboard-operable**
+- Given: a mobile viewport (390×844) where not all bestseller cards fit on screen
+- When: the page loads
+- Then: Prev starts disabled and Next enabled; focusing Next and pressing Enter scrolls the carousel, enabling Prev
+
+**E16 — Custom 404 shows the wilted-away page**
+- Given: an unmatched route is requested
+- When: the page loads
+- Then: "This Page Has Wilted Away" is shown with links back to Home and Plants (closes the FR-10.2 gap — no other M4 issue owned this)
+
+### A11y scenarios
+
+**A3 — Zero critical/serious axe-core violations on `/` (Home)**
+- Given: `/` is built and served
+- When: an axe-core scan runs against the page
+- Then: no violation with impact `critical` or `serious` is reported
+- Note: caught a real `color-contrast` violation (serious) on `Button`'s existing `accent` variant (`bg-amber-600` + white text = 3.19:1, needs 4.5:1) — first page to actually render that variant. Fixed at the source (`bg-amber-700`/`hover:bg-amber-800`) rather than avoiding the variant, since it's shared by any future page using `variant="accent"`.
