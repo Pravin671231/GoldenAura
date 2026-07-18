@@ -16,7 +16,7 @@ Each `###` section below is a ready-to-file GitHub issue, 1:1 with a milestone o
 **Filing order:** top to bottom. Numbering below (`M1`, `M2`, …, `M4.1`…`M4.13`, `M5`) is a local reference key, not a GitHub issue number — if filed in this order, GitHub's auto-incrementing issue numbers will land in the same sequence.
 
 **GitHub Milestones** (native milestone object, not a label) — create five, matching `MILESTONES.md`:
-`M1 — Base Project Setup + Test Suite`, `M2 — CI Pipeline`, `M3 — Docker & Deployment / CD Pipeline`, `M4 — Feature Build-Out`, `M5 — Launch Readiness`. Assign each issue to its matching milestone.
+`M1 — Base Project Setup + Test Suite`, `M2 — CI Pipeline`, `M3 — Deployment / CD Pipeline`, `M4 — Feature Build-Out`, `M5 — Launch Readiness`. Assign each issue to its matching milestone.
 
 **Labels** — two axes:
 | Axis | Values |
@@ -32,7 +32,7 @@ Each `###` section below is a ready-to-file GitHub issue, 1:1 with a milestone o
 |---|---|---|---|
 | M1 | Base Project Setup + Test Suite (Workspace Scaffold) | M1 | — |
 | M2 | CI Pipeline (GitHub Actions) | M2 | M1 |
-| M3 | Docker & Deployment / CD Pipeline | M3 | M2 |
+| M3 | Deployment / CD Pipeline | M3 | M2 |
 | M4 | Feature Build-Out (epic) | M4 | M3 |
 | M4.1 | `feat/design-system` | M4 | M3 |
 | M4.2 | `feat/contact-page` | M4 | M4.1 |
@@ -69,7 +69,7 @@ Golden Aura is a static-export Next.js catalog/lead-gen site (`SRS.md` §1–2) 
 - `app/components/ui/` vs `app/components/layout/` structure definition
 - Lint/format config, Vitest + RTL, base layout shell, npm scripts, git init
 
-**Out of scope:** actual feature-page implementation (M4), CI automation (M2), Docker (M3).
+**Out of scope:** actual feature-page implementation (M4), CI automation (M2), deployment (M3).
 
 ### Implementation Tasks
 - [ ] 1.1 Root `package.json` with `"workspaces": ["app", "e2e"]`; Node version pinned (`.nvmrc` + `engines`)
@@ -144,43 +144,37 @@ Per `MILESTONES.md` §0 sequencing policy, the test suite (M1) must exist before
 
 ---
 
-## Issue: M3 — Docker & Deployment / CD Pipeline
+## Issue: M3 — Deployment / CD Pipeline
 
-**GitHub Milestone:** M3 — Docker & Deployment / CD Pipeline
+**GitHub Milestone:** M3 — Deployment / CD Pipeline
 **Labels:** `type:infra`
 **Depends on:** M2 · **Blocks:** M4 (all)
 
 ### Context
-A reproducible, containerized build-and-serve path with GitHub Actions handling continuous deployment on merge to `main`, once CI (M2) is green. Docker configuration lives in a dedicated `docker/` folder (not repo root) per the workspace layout in `MILESTONES.md` §0 — the build context is still the repo root (so the image can see the workspace lockfile and `app/`), invoked as `docker build -f docker/Dockerfile .`. `.dockerignore` is the one exception kept at the repo root, since Docker resolves it against the build context rather than the Dockerfile's own directory.
+GitHub Actions handles continuous deployment of the static export to Vercel on merge to `main`, once CI (M2) is green.
 
-Because this is a static export, Docker/Nginx is one valid hosting path (useful for self-hosted VPS control) — plain static hosts (Netlify/Cloudflare Pages/Vercel static) remain a simpler alternative if self-hosting isn't required. **Confirm the hosting target before building this out fully.**
+**Decision (2026-07-18):** Docker/self-hosted-VPS deployment (this milestone's original scope) was dropped in favor of deploying the static `app/out/` directly to Vercel. Rationale: `output: 'export'` produces a plain static site with no server-side runtime requirement, so a container + reverse proxy adds operational overhead (image builds, a registry, host management, SSH deploy) without buying anything a static host doesn't already provide — Vercel's own build/deploy/rollback tooling covers the milestone's actual goals (reproducible deploy on merge, health check, rollback) more simply. `docker/` is removed from the workspace layout in `MILESTONES.md` §0.
 
 ### Scope
-**In scope:** `docker/Dockerfile`, `docker/docker-compose.yml`, root `.dockerignore`, `cd.yml`, GHCR push, deploy + health check, rollback documentation.
-**Out of scope:** final hosting-target decision (flagged above as a pre-req), feature pages (M4).
+**In scope:** `cd.yml`, Vercel CLI deploy, post-deploy health check, rollback documentation.
+**Out of scope:** feature pages (M4).
 
 ### Implementation Tasks
-- [ ] 3.1 Multi-stage `docker/Dockerfile`: stage 1 (Node 20) installs deps + runs `next build` (static export) from `app/`; stage 2 (nginx:alpine) copies `app/out/` and serves it
-- [ ] 3.2 `docker/docker-compose.yml` for local preview (`context: ..`, `dockerfile: docker/Dockerfile`)
-- [ ] 3.3 `.dockerignore` at repo root — build-context root, not `docker/`
-- [ ] 3.4 `.github/workflows/cd.yml`: on merge to `main` (after CI passes) — `docker build -f docker/Dockerfile .`, tag with commit SHA + `latest`
-- [ ] 3.5 Push image to GitHub Container Registry (ghcr.io)
-- [ ] 3.6 Deploy step: pull + run the image on the target host (SSH action or redeploy webhook)
-- [ ] 3.7 Document rollback procedure: redeploy previous image tag
-- [ ] 3.8 Health check: container serves `/` with HTTP 200 post-deploy, workflow fails the deploy if not
+- [ ] 3.1 `.github/workflows/cd.yml`: triggered on push to `main` (branch protection from M2 already guarantees CI passed before code lands there)
+- [ ] 3.2 Vercel CLI deploy (`vercel pull` / `vercel build` / `vercel deploy --prebuilt --prod`), authenticated via `VERCEL_TOKEN`/`VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` repo secrets
+- [ ] 3.3 Post-deploy health check: `curl` the deployment URL, expect HTTP 200, fail the workflow otherwise
+- [ ] 3.4 Document rollback procedure (Vercel's instant-rollback to a previous deployment) and exercise it at least once
 
 ### Acceptance Criteria
-- [ ] A merge to `main` results in an updated container image automatically built, pushed to GHCR, and deployed with zero manual steps
-- [ ] The running container serves `/` with HTTP 200 (automated post-deploy health check)
-- [ ] Rollback procedure is documented and has been exercised at least once (redeploy previous tag succeeds)
-- [ ] `docker compose up` against `docker/docker-compose.yml` from repo root produces a working local preview
+- [ ] A merge to `main` results in an updated Vercel deployment automatically built and deployed with zero manual steps
+- [ ] The deployment serves `/` with HTTP 200 (automated post-deploy health check)
+- [ ] Rollback procedure is documented and has been exercised at least once
 
 ### Test Requirements
-- CD workflow health-check step (3.8) is the automated test gate for this milestone
-- Manual verification: build the image locally with the exact CI command (`docker build -f docker/Dockerfile .`) and confirm it matches what CI produces
+- CD workflow health-check step (3.3) is the automated test gate for this milestone
 
 ### References
-`MILESTONES.md` §Milestone 3, §0 Workspace layout (`docker/` folder + `.dockerignore` exception)
+`MILESTONES.md` §Milestone 3
 
 ---
 
