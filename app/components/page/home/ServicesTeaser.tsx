@@ -3,15 +3,18 @@ import { Button } from "@/components/ui/Button";
 
 const TEASERS = [
   {
-    heading: "🌳 Landscaping & Garden Design",
+    emoji: "🌳",
+    name: "Landscaping & Garden Design",
     body: "Home, terrace and office garden design, planned and planted by our team.",
   },
   {
-    heading: "🩺 Plant Doctor Consultation",
+    emoji: "🩺",
+    name: "Plant Doctor Consultation",
     body: "Sick or struggling plant? Get expert diagnosis and a care plan.",
   },
   {
-    heading: "🧑‍🌾 Plant Maintenance (AMC)",
+    emoji: "🧑‍🌾",
+    name: "Plant Maintenance (AMC)",
     body: "Scheduled watering, pruning and pest care for homes and offices.",
   },
 ];
@@ -20,11 +23,13 @@ export function ServicesTeaser() {
   return (
     <div className="grid gap-6 sm:grid-cols-3">
       {TEASERS.map((teaser) => (
-        <Card key={teaser.heading} className="flex flex-col gap-3">
-          <h3 className="font-semibold">{teaser.heading}</h3>
+        <Card key={teaser.name} className="flex flex-col gap-3">
+          <h3 className="font-semibold">
+            {teaser.emoji} {teaser.name}
+          </h3>
           <p className="text-black/70">{teaser.body}</p>
           <Button href="/services" variant="outline" size="sm" className="mt-auto self-start">
-            Learn More
+            Learn more about {teaser.name}
           </Button>
         </Card>
       ))}
