@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Pravin671231/GoldenAura/actions/workflows/ci.yml/badge.svg)](https://github.com/Pravin671231/GoldenAura/actions/workflows/ci.yml)
 
-Static-export Next.js catalog/lead-gen site for an ornamental plants shop. See [docs/SRS.md](docs/SRS.md) for requirements and [docs/MILESTONES.md](docs/MILESTONES.md) for the build plan.
+Static-export Next.js catalog/lead-gen site for an ornamental plants shop. See [docs/SRS.md](docs/SRS.md) for requirements, [docs/MILESTONES.md](docs/MILESTONES.md) for the build plan, and [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the Vercel CD setup.
 
 ## Workspace layout
 
