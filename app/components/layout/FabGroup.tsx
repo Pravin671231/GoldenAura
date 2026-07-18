@@ -1,11 +1,10 @@
-const PHONE_NUMBER = "+919876543210";
-const WHATSAPP_NUMBER = "919876543210";
-const WHATSAPP_MESSAGE = "Hi Golden Aura, I'd like to know more";
+import { SITE } from "@/lib/site-config";
+import { buildWhatsAppLink } from "@/lib/whatsapp";
 
 function WhatsAppFab() {
   return (
     <a
-      href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`}
+      href={buildWhatsAppLink()}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"
@@ -33,7 +32,7 @@ function WhatsAppFab() {
 function CallFab() {
   return (
     <a
-      href={`tel:${PHONE_NUMBER}`}
+      href={`tel:${SITE.phone}`}
       aria-label="Call Golden Aura"
       className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-600 text-white shadow-lg hover:bg-amber-700"
     >
