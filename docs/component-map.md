@@ -90,3 +90,17 @@ components are **not** created in M1.
 Everything else in the tables above (`HeroFull`, `ProductCard`, `BentoGallery`, `ContactForm`,
 article-layout pieces, etc.) is built incrementally starting with `feat/design-system` (M4.1) and
 each subsequent per-page M4 branch, per the per-branch workflow in `docs/MILESTONES.md`.
+
+## Update (M4.2 — `feat/contact-page`)
+
+- `SectionHead` (eyebrow + heading + intro) added to `components/ui/` — not part of the M1 scaffold
+  list above, but needed starting with this branch and reused by every page listed in the
+  "Cross-page reusable components" table.
+- Page-specific, non-reusable components now live under `components/page/<route>/` (e.g.
+  `components/page/contact/{ContactForm,FormStatus,InfoList,HoursTable}.tsx`), distinct from the
+  cross-page `components/ui/`/`components/layout/` split — keeps single-page components out of the
+  shared atom directories.
+- `lib/site-config.ts` is the single NAP (name/address/phone/hours/WhatsApp/maps-embed) source of
+  truth; `Header`/`Footer`/`FabGroup` and all page-level contact info now read from it instead of
+  hardcoding values (this also fixed a pre-existing address drift between `Footer.tsx` and
+  `mock-ui/contact.html`).

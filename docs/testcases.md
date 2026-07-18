@@ -63,3 +63,53 @@ FR refs: FR-1.6, FR-10.1, FR-10.3 · NFR refs: NFR-3.2, NFR-3.4, NFR-6.1
 - Given: `/` and `/about` are built and served
 - When: an axe-core scan runs against each page
 - Then: no violation with impact `critical` or `serious` is reported
+
+## Feature: Contact page (M4.2 — `feat/contact-page`, issue #6)
+
+FR refs: FR-8.1–FR-8.4 · NFR refs: NFR-4.1, NFR-4.2
+
+### Unit/component tests
+
+| ID | Component | Description |
+|----|-----------|-------------|
+| U12 | `contactFormSchema` (zod) | Accepts a valid payload with empty optional email; accepts a valid email; rejects a malformed email; requires non-empty name; requires a plausible phone number; requires a ≥10-char message; allows `service` to be omitted |
+| U13 | `SectionHead` | Renders eyebrow/heading/intro; renders as `h1` or `h2` on request; omits eyebrow/intro when not provided |
+| U14 | `FormStatus` | Renders nothing when idle; renders submitting/success messages; renders an error message with `tel:`/`wa.me` fallback links |
+| U15 | `InfoList` | Renders the store address, a `tel:` link, and a `wa.me` link with `target="_blank"`/`rel="noopener noreferrer"` |
+| U16 | `HoursTable` | Renders every configured hours row |
+| U17 | `ContactForm` | Renders all fields with "General Inquiry" selected by default; pre-selects the service named by a `?service=` query param; shows validation errors and never calls the form backend when required fields are missing; shows success state on a successful (mocked) submission; shows error state on a failed (mocked) submission |
+
+### E2E scenarios (Given/When/Then)
+
+**E7 — Contact page shows address, hours, and correctly targeted links**
+- Given: `/contact` is built and served
+- When: the page loads
+- Then: the store address and hours are visible, the phone link targets `tel:+919876543210`, and the WhatsApp link targets `https://wa.me/919876543210...` with `target="_blank"` and `rel="noopener noreferrer"`
+
+**E8 — `?service=` query param pre-fills the quote form's service dropdown**
+- Given: `/contact?service=amc` is loaded
+- When: the page loads
+- Then: the "I'm interested in" dropdown is pre-set to "Plant Maintenance (AMC)" (the M4.5/#9 integration contract)
+
+**E9 — Successful form submission shows a confirmation state**
+- Given: the Web3Forms endpoint is mocked to return `{ success: true }`
+- When: all required fields are filled in and the form is submitted
+- Then: a success status message is shown
+
+**E10 — Failed form submission shows an error state with fallback contact options**
+- Given: the Web3Forms endpoint is mocked to return a failure response
+- When: all required fields are filled in and the form is submitted
+- Then: an error alert is shown with working `tel:`/`wa.me` fallback links
+
+**E11 — Empty required fields block submission**
+- Given: the form is untouched
+- When: Send Message is clicked
+- Then: a validation error is shown and the form backend is never called
+
+### A11y scenarios
+
+**A2 — Zero critical/serious axe-core violations on `/contact`**
+- Given: `/contact` is built and served
+- When: an axe-core scan runs against the page
+- Then: no violation with impact `critical` or `serious` is reported
+- Note: an earlier draft nested `dt`/`dd` inside a wrapping `<div>` under `<dl>` in `InfoList`, which axe correctly flagged (`dlitem`, serious) as not being a direct child of the list — fixed by switching to a plain `<ul>`/`<li>` structure instead of forcing definition-list semantics onto a layout that needed an icon column.
