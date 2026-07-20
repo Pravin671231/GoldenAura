@@ -131,3 +131,12 @@ each subsequent per-page M4 branch, per the per-branch workflow in `docs/MILESTO
 - `app/plants/[category]/page.tsx` establishes the project's dynamic-route pattern
   (`generateStaticParams` + `export const dynamicParams = false` + `generateMetadata` awaiting a
   `Promise<params>`) — reused as-is by `/care-guide/[slug]` (M4.8).
+
+## Update (M4.7 — `feat/pots-accessories`)
+
+- `/pots-accessories` reuses `ProductCard` with `chips` omitted (the no-chip variant already
+  anticipated in M4.4's plan) via a small `components/page/pots-accessories/ProductGroupSection.tsx`
+  wrapper — no new card component, per FR-4.2's explicit requirement.
+- FR-4.1's 4 groups vs. the mock's merged "Gardening Tools & Decor" section: split into "Gardening
+  Tools" and "Decorative Accessories" to match the literal 4-group acceptance criterion (see
+  `docs/testcases.md`'s content note on this branch).

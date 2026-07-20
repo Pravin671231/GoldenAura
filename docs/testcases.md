@@ -229,3 +229,31 @@ FR refs: FR-3.1–FR-3.5 · NFR refs: NFR-5.1, NFR-5.2
 - `params` is a `Promise` in this Next.js version — `generateMetadata`/the page component both `await params`.
 - jsdom implements neither `matchMedia` nor `IntersectionObserver`/`ResizeObserver` (needed by `embla-carousel-react`, #7) — polyfilled once in `vitest.setup.ts`, reused here for free.
 - `yet-another-react-lightbox`'s Close button schedules a real `setTimeout` (fade-animation duration) before calling back — component tests must `waitFor` it rather than asserting synchronously after the click.
+
+## Feature: Pots & Accessories (M4.7 — `feat/pots-accessories`, issue #11)
+
+FR refs: FR-4.1, FR-4.2
+
+### Unit/component tests
+
+| ID | Component/module | Description |
+|----|-------------------|--------------|
+| U36 | `data/pots-accessories.ts` (`getProductsByGroup`) | Exactly 4 product groups (FR-4.1); every group has ≥1 product; returns only products in the given group; empty array for an unknown group; unique product ids |
+| U37 | `ProductGroupSection` | Renders the group heading; renders a product card (name/description/price/Inquire CTA) per product, reusing `ProductCard` — no bespoke card component (FR-4.2) |
+
+### E2E scenarios (Given/When/Then)
+
+**E23 — `/pots-accessories` lists all 4 product groups**
+- Given: `/pots-accessories` is built and served
+- When: the page loads
+- Then: all 4 group headings (Pots & Planters, Soil/Manure & Fertilizers, Gardening Tools, Decorative Accessories) are visible, each product shows photo/name/description/price, and all 12 "Inquire" CTAs link to `/contact`
+
+### A11y scenarios
+
+**A5 — Zero critical/serious axe-core violations on `/pots-accessories`**
+- Given: `/pots-accessories` is built and served
+- When: an axe-core scan runs against the page
+- Then: no violation with impact `critical` or `serious` is reported
+
+### Content note
+FR-4.1 names 4 groups (pots/planters, soil & fertilizers, tools, decorative accessories), but `mock-ui/pots-accessories.html` visually merges tools+decor into one "Gardening Tools & Decor" section of 4 products. Split that section in two — Gardening Tools (Tool Kit, Trellis) and Decorative Accessories (Pebbles, Plant Stands) — to match the literal 4-group acceptance criterion rather than the mock's 3-section layout.
