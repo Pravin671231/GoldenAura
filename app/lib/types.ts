@@ -45,3 +45,18 @@ export type GalleryPhoto = {
   cellType: GalleryCellType;
   goldVariant?: boolean;
 };
+
+export type PotsAccessoryGroupSlug = "pots-planters" | "soil-fertilizers" | "tools" | "decor";
+
+export type PotsAccessoryGroup = {
+  slug: PotsAccessoryGroupSlug;
+  title: string;
+};
+
+export type PotsAccessoryProduct = {
+  id: string;
+  groupSlug: PotsAccessoryGroupSlug;
+  name: string;
+  description: string;
+  priceLabel: string;
+};
