@@ -19,4 +19,19 @@ describe("OfferStrip", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Shop the Offer" })).toHaveAttribute("href", "/plants");
   });
+
+  it("adds target/rel when the CTA is external", () => {
+    render(
+      <OfferStrip
+        heading="Not sure what suits your space?"
+        body="Send us a photo on WhatsApp."
+        ctaLabel="WhatsApp Us"
+        ctaHref="https://wa.me/919876543210"
+        external
+      />,
+    );
+    const link = screen.getByRole("link", { name: "WhatsApp Us" });
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+  });
 });
