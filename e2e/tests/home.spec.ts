@@ -21,20 +21,16 @@ test.describe("/ (Home)", () => {
     await expect(page.getByRole("heading", { name: "Ready to Green Up Your Space?" })).toBeVisible();
   });
 
-  test("category grid links resolve to each category's /plants/[category] route", async ({
+  test("clicking a featured category card navigates to its real /plants/[category] page", async ({
     page,
   }) => {
     await page.goto("/");
 
-    const expectedHrefs = [
-      "/plants/indoor-foliage",
-      "/plants/air-purifying",
-      "/plants/succulents-cacti",
-      "/plants/flowering",
-    ];
-    for (const href of expectedHrefs) {
-      await expect(page.locator(`a[href="${href}"]`).first()).toBeVisible();
-    }
+    await page.locator('a[href="/plants/indoor-foliage"]').first().click();
+    await expect(page).toHaveURL(/\/plants\/indoor-foliage/);
+    await expect(
+      page.getByRole("heading", { name: "Indoor & Foliage Plants" }),
+    ).toBeVisible();
   });
 
   test("gallery preview strip links to /gallery", async ({ page }) => {
