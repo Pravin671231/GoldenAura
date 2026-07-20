@@ -167,3 +167,65 @@ FR refs: FR-1.1–FR-1.5, FR-1.7 · NFR refs: NFR-3.1 (alt text)
 - When: an axe-core scan runs against the page
 - Then: no violation with impact `critical` or `serious` is reported
 - Note: caught a real `color-contrast` violation (serious) on `Button`'s existing `accent` variant (`bg-amber-600` + white text = 3.19:1, needs 4.5:1) — first page to actually render that variant. Fixed at the source (`bg-amber-700`/`hover:bg-amber-800`) rather than avoiding the variant, since it's shared by any future page using `variant="accent"`.
+
+## Feature: Plants catalog (M4.4 — `feat/plants-catalog`, issue #8)
+
+FR refs: FR-3.1–FR-3.5 · NFR refs: NFR-5.1, NFR-5.2
+
+### Unit/component tests
+
+| ID | Component/module | Description |
+|----|-------------------|--------------|
+| U28 | `data/plants.ts` (`getPlantsByCategory`) | Returns only plants in the given category; empty array for an unknown category; every core category has ≥1 plant |
+| U29 | `data/plants.ts` (`getBestsellers`) | Returns only plants flagged `isBestseller` |
+| U30 | `data/plants.ts` (`PLANTS`) | Every plant has a unique `slug` across the whole catalog |
+| U31 | `ChipRow` | Renders a chip per item; renders nothing for an empty list |
+| U32 | `ProductCard` | Renders name/description/chips/price/CTA; omits the chip row when no chips given (pots-accessories no-chip variant); image is clickable and fires `onImageClick` when provided; renders a static (non-button) image otherwise |
+| U33 | `PhotoLightbox` | Renders nothing when closed; shows the current slide when open; calls `onClose` when Close is activated (waits out the fade-animation `setTimeout`); exposes Next/Previous controls |
+| U34 | `CategoryProductGrid` | Renders a `ProductCard` per plant; every Inquire CTA links to `/contact`; clicking a photo opens the lightbox on the matching slide |
+| U35 | `OfferStrip` | Adds `target`/`rel` when `external` is set (NFR-4.2) |
+
+### E2E scenarios (Given/When/Then)
+
+**E17 — `/plants` hub displays all 8 core categories**
+- Given: `/plants` is built and served
+- When: the page loads
+- Then: all 8 category cards are visible, each linking to its `/plants/[category]` route
+
+**E18 — Category navigation works for all 8 categories**
+- Given: `/plants` is built and served
+- When: each category card is clicked in turn
+- Then: the corresponding `/plants/[category]` page loads with its plants listed and at least one "Inquire" CTA linking to `/contact`
+
+**E19 — Lightbox opens, navigates, and closes**
+- Given: a category page with plant photos
+- When: a photo is clicked, then Next/Previous, then Close
+- Then: the lightbox dialog opens on the clicked photo, navigation controls work, and Close dismisses it
+
+**E20 — Lightbox is keyboard-operable**
+- Given: the lightbox is open
+- When: Escape is pressed
+- Then: the lightbox closes
+
+**E21 — An unlisted category slug shows the custom 404**
+- Given: `dynamicParams = false` with full `generateStaticParams` coverage
+- When: `/plants/not-a-real-category` is requested
+- Then: the custom 404 page renders (never built as a static route)
+
+**E22 (extends Home, #7) — Category grid link now performs real navigation**
+- Given: `/` is built and served
+- When: the "Indoor & Foliage Plants" category card is clicked
+- Then: the browser navigates to `/plants/indoor-foliage` and its heading renders (previously only asserted the `href` existed, since the target 404'd before this branch)
+
+### A11y scenarios
+
+**A4 — Zero critical/serious axe-core violations on `/plants` and a representative category page**
+- Given: `/plants` and `/plants/indoor-foliage` are built and served
+- When: an axe-core scan runs against each page
+- Then: no violation with impact `critical` or `serious` is reported, including the lightbox
+
+### Notable implementation facts (verified against `node_modules/next/dist/docs`, not assumed)
+- `export const dynamicParams = false` is required on `/plants/[category]/page.tsx` — under `output: 'export'`, the default (`true`) is an explicitly unsupported feature and breaks `next build`, even with full `generateStaticParams` coverage.
+- `params` is a `Promise` in this Next.js version — `generateMetadata`/the page component both `await params`.
+- jsdom implements neither `matchMedia` nor `IntersectionObserver`/`ResizeObserver` (needed by `embla-carousel-react`, #7) — polyfilled once in `vitest.setup.ts`, reused here for free.
+- `yet-another-react-lightbox`'s Close button schedules a real `setTimeout` (fade-animation duration) before calling back — component tests must `waitFor` it rather than asserting synchronously after the click.

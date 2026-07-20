@@ -117,3 +117,17 @@ each subsequent per-page M4 branch, per the per-branch workflow in `docs/MILESTO
   explicitly owned it and Home's category grid already needed 404-tolerant linking.
 - `data/{categories,plants,testimonials,gallery}.ts` authored in full (all 8 categories, though only
   4 plants seeded so far — the rest arrive in M4.4/`feat/plants-catalog`).
+
+## Update (M4.4 — `feat/plants-catalog`)
+
+- `ChipRow`, `ProductCard`, and `PhotoLightbox` (wraps `yet-another-react-lightbox`) added to
+  `components/ui/` — the canonical product-listing card, reused by Home's `BestsellerCard`
+  (retrofitted onto it, per M4.1's plan) and by Pots & Accessories (M4.7, chips omitted — the
+  "no-chip variant" already anticipated in this doc).
+- `data/plants.ts` extended to all 8 categories (`getPlantsByCategory`, `getBestsellers`); every
+  category has at least one plant, unit-tested directly (SRS §9's "data-lookup utilities").
+- `components/page/plants/CategoryProductGrid.tsx` — the client-side wrapper tying `ProductCard`
+  grid + `PhotoLightbox` state together for `/plants/[category]`.
+- `app/plants/[category]/page.tsx` establishes the project's dynamic-route pattern
+  (`generateStaticParams` + `export const dynamicParams = false` + `generateMetadata` awaiting a
+  `Promise<params>`) — reused as-is by `/care-guide/[slug]` (M4.8).

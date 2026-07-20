@@ -1,8 +1,7 @@
 import type { Plant } from "@/lib/types";
 
-// Seed data: only the Home page's bestsellers for now. The full 8-category
-// catalog is populated in the M4.4 (feat/plants-catalog) branch.
 export const PLANTS: Plant[] = [
+  // Indoor & Foliage Plants — full listing, from mock-ui/plants-category.html
   {
     id: "areca-palm",
     slug: "areca-palm",
@@ -15,6 +14,78 @@ export const PLANTS: Plant[] = [
     isBestseller: true,
   },
   {
+    id: "money-plant",
+    slug: "money-plant",
+    name: "Money Plant",
+    categorySlug: "indoor-foliage",
+    description: "Classic trailing vine, thrives in water or soil.",
+    careLight: "🌥 Low Light",
+    careWater: "💧 Low Water",
+    priceRange: { min: 99, max: 350 },
+  },
+  {
+    id: "philodendron",
+    slug: "philodendron",
+    name: "Philodendron",
+    categorySlug: "indoor-foliage",
+    description: "Glossy heart-shaped leaves, easy-going nature.",
+    careLight: "🌥 Low–Medium Light",
+    careWater: "💧 Medium Water",
+    priceRange: { min: 300, max: 800 },
+  },
+  {
+    id: "calathea",
+    slug: "calathea",
+    name: "Calathea",
+    categorySlug: "indoor-foliage",
+    description: "Striking patterned leaves, folds up at night.",
+    careLight: "🌥 Indirect Light",
+    careWater: "💧 High Water",
+    priceRange: { min: 350, max: 900 },
+  },
+  {
+    id: "rubber-plant",
+    slug: "rubber-plant",
+    name: "Rubber Plant",
+    categorySlug: "indoor-foliage",
+    description: "Bold, glossy foliage — statement floor plant.",
+    careLight: "☀ Bright, Indirect",
+    careWater: "💧 Medium Water",
+    priceRange: { min: 500, max: 1400 },
+  },
+  {
+    id: "croton",
+    slug: "croton",
+    name: "Croton",
+    categorySlug: "indoor-foliage",
+    description: "Vibrant multi-colour foliage, loves bright spots.",
+    careLight: "☀ Bright Light",
+    careWater: "💧 Medium Water",
+    priceRange: { min: 250, max: 600 },
+  },
+  {
+    id: "peace-lily",
+    slug: "peace-lily",
+    name: "Peace Lily",
+    categorySlug: "indoor-foliage",
+    description: "Elegant white blooms, thrives indoors.",
+    careLight: "🌥 Low Light",
+    careWater: "💧 High Water",
+    priceRange: { min: 300, max: 700 },
+  },
+  {
+    id: "fiddle-leaf-fig",
+    slug: "fiddle-leaf-fig",
+    name: "Fiddle Leaf Fig",
+    categorySlug: "indoor-foliage",
+    description: "Large violin-shaped leaves, a modern interior favorite.",
+    careLight: "☀ Bright, Indirect",
+    careWater: "💧 Medium Water",
+    priceRange: { min: 800, max: 2200 },
+  },
+
+  // Air-Purifying Plants
+  {
     id: "snake-plant",
     slug: "snake-plant",
     name: "Snake Plant",
@@ -25,6 +96,18 @@ export const PLANTS: Plant[] = [
     priceRange: { min: 250, max: 600 },
     isBestseller: true,
   },
+  {
+    id: "spider-plant",
+    slug: "spider-plant",
+    name: "Spider Plant",
+    categorySlug: "air-purifying",
+    description: "Arching striped leaves, one of the easiest air-purifiers to grow.",
+    careLight: "🌥 Low–Medium Light",
+    careWater: "💧 Low Water",
+    priceRange: { min: 120, max: 350 },
+  },
+
+  // Succulents & Cacti
   {
     id: "jade-plant",
     slug: "jade-plant",
@@ -37,6 +120,28 @@ export const PLANTS: Plant[] = [
     isBestseller: true,
   },
   {
+    id: "echeveria",
+    slug: "echeveria",
+    name: "Echeveria",
+    categorySlug: "succulents-cacti",
+    description: "Rosette-shaped succulent in soft blue-green tones.",
+    careLight: "☀ Bright Light",
+    careWater: "💧 Low Water",
+    priceRange: { min: 90, max: 250 },
+  },
+  {
+    id: "haworthia",
+    slug: "haworthia",
+    name: "Haworthia",
+    categorySlug: "succulents-cacti",
+    description: "Compact striped succulent, perfect for small desks.",
+    careLight: "🌥 Bright, Indirect",
+    careWater: "💧 Low Water",
+    priceRange: { min: 100, max: 280 },
+  },
+
+  // Flowering Plants
+  {
     id: "hibiscus",
     slug: "hibiscus",
     name: "Hibiscus",
@@ -47,8 +152,150 @@ export const PLANTS: Plant[] = [
     priceRange: { min: 150, max: 350 },
     isBestseller: true,
   },
+  {
+    id: "rose",
+    slug: "rose",
+    name: "Rose",
+    categorySlug: "flowering",
+    description: "Classic fragrant blooms in a range of colours.",
+    careLight: "☀ Full Sun",
+    careWater: "💧 Medium Water",
+    priceRange: { min: 150, max: 450 },
+  },
+  {
+    id: "bougainvillea",
+    slug: "bougainvillea",
+    name: "Bougainvillea",
+    categorySlug: "flowering",
+    description: "Vibrant papery bracts, thrives on neglect.",
+    careLight: "☀ Full Sun",
+    careWater: "💧 Low Water",
+    priceRange: { min: 200, max: 600 },
+  },
+
+  // Outdoor & Garden Plants
+  {
+    id: "hedge-plants",
+    slug: "hedge-plants",
+    name: "Hedge Plants",
+    categorySlug: "outdoor-garden",
+    description: "Dense, trimmable shrubs for borders and privacy screens.",
+    careLight: "☀ Full Sun",
+    careWater: "💧 Medium Water",
+    priceRange: { min: 150, max: 500 },
+  },
+  {
+    id: "ground-cover",
+    slug: "ground-cover",
+    name: "Ground Cover Plants",
+    categorySlug: "outdoor-garden",
+    description: "Low, spreading greenery that fills bare garden beds.",
+    careLight: "☀ Full Sun",
+    careWater: "💧 Medium Water",
+    priceRange: { min: 80, max: 250 },
+  },
+  {
+    id: "ornamental-grass",
+    slug: "ornamental-grass",
+    name: "Ornamental Grass",
+    categorySlug: "outdoor-garden",
+    description: "Textured grasses that add movement to any garden.",
+    careLight: "☀ Full Sun",
+    careWater: "💧 Low Water",
+    priceRange: { min: 120, max: 350 },
+  },
+
+  // Bonsai
+  {
+    id: "ficus-bonsai",
+    slug: "ficus-bonsai",
+    name: "Ficus Bonsai",
+    categorySlug: "bonsai",
+    description: "Classic beginner bonsai with glossy small leaves.",
+    careLight: "☀ Bright, Indirect",
+    careWater: "💧 Medium Water",
+    priceRange: { min: 600, max: 1800 },
+  },
+  {
+    id: "banyan-bonsai",
+    slug: "banyan-bonsai",
+    name: "Banyan Bonsai",
+    categorySlug: "bonsai",
+    description: "Aerial-rooted bonsai with a dramatic mature look.",
+    careLight: "☀ Bright Light",
+    careWater: "💧 Medium Water",
+    priceRange: { min: 900, max: 2500 },
+  },
+  {
+    id: "juniper-bonsai",
+    slug: "juniper-bonsai",
+    name: "Juniper Bonsai",
+    categorySlug: "bonsai",
+    description: "Traditional needle-leaf bonsai, popular for shaping.",
+    careLight: "☀ Full Sun",
+    careWater: "💧 Low Water",
+    priceRange: { min: 700, max: 2000 },
+  },
+
+  // Palms & Tropical Plants
+  {
+    id: "bamboo-palm",
+    slug: "bamboo-palm",
+    name: "Bamboo Palm",
+    categorySlug: "palms-tropical",
+    description: "Clumping, shade-tolerant palm with a tropical look.",
+    careLight: "🌥 Low–Medium Light",
+    careWater: "💧 Medium Water",
+    priceRange: { min: 400, max: 1000 },
+  },
+  {
+    id: "banana-plant",
+    slug: "banana-plant",
+    name: "Banana Plant",
+    categorySlug: "palms-tropical",
+    description: "Large tropical leaves for an instant jungle feel.",
+    careLight: "☀ Bright Light",
+    careWater: "💧 High Water",
+    priceRange: { min: 350, max: 900 },
+  },
+
+  // Climbers & Creepers
+  {
+    id: "money-plant-vine",
+    slug: "money-plant-vine",
+    name: "Money Plant Vine",
+    categorySlug: "climbers-creepers",
+    description: "Fast-growing climbing vine, trains easily onto trellises.",
+    careLight: "🌥 Low Light",
+    careWater: "💧 Low Water",
+    priceRange: { min: 120, max: 300 },
+  },
+  {
+    id: "morning-glory",
+    slug: "morning-glory",
+    name: "Morning Glory",
+    categorySlug: "climbers-creepers",
+    description: "Fast climber with trumpet-shaped blooms.",
+    careLight: "☀ Full Sun",
+    careWater: "💧 Medium Water",
+    priceRange: { min: 100, max: 280 },
+  },
+  {
+    id: "ivy",
+    slug: "ivy",
+    name: "Ivy",
+    categorySlug: "climbers-creepers",
+    description: "Classic trailing/climbing evergreen.",
+    careLight: "🌥 Low–Medium Light",
+    careWater: "💧 Medium Water",
+    priceRange: { min: 90, max: 250 },
+  },
 ];
 
 export function getBestsellers(): Plant[] {
   return PLANTS.filter((plant) => plant.isBestseller);
+}
+
+export function getPlantsByCategory(categorySlug: string): Plant[] {
+  return PLANTS.filter((plant) => plant.categorySlug === categorySlug);
 }
